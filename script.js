@@ -12,6 +12,7 @@ class DiffViewerApp {
         this.currentDiffHTML = '';
         
         this.initializeEventListeners();
+        this.setupDragAndDrop();
     }
 
     /**
@@ -32,6 +33,59 @@ class DiffViewerApp {
         
         // ダウンロードボタンイベント
         downloadBtn.addEventListener('click', () => this.downloadHTML());
+    }
+
+    /**
+     * ドラッグ＆ドロップ機能のセットアップ
+     */
+    setupDragAndDrop() {
+        const containers = document.querySelectorAll('.textarea-container');
+
+        containers.forEach(container => {
+            const textarea = container.querySelector('textarea');
+
+            // デフォルトの動作を無効化
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                container.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            // ドラッグオーバー時のハイライト
+            ['dragenter', 'dragover'].forEach(eventName => {
+                container.addEventListener(eventName, () => {
+                    container.classList.add('drag-over');
+                }, false);
+            });
+
+            // ドラッグリーブ時、ドロップ時のハイライト解除
+            ['dragleave', 'drop'].forEach(eventName => {
+                container.addEventListener(eventName, () => {
+                    container.classList.remove('drag-over');
+                }, false);
+            });
+
+            // ドロップ処理
+            container.addEventListener('drop', (e) => {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+
+                if (files.length > 0) {
+                    const file = files[0];
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        textarea.value = event.target.result;
+                    };
+                    reader.onerror = () => {
+                        alert('ファイルの読み込みに失敗しました。');
+                    };
+                    reader.readAsText(file);
+                }
+            }, false);
+        });
     }
 
     /**

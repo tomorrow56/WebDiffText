@@ -59,6 +59,12 @@ header p {
 .file-input-wrapper {
     display: flex;
     flex-direction: column;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.textarea-container.drag-over {
+    border-color: #007bff;
+    background-color: #f0f8ff;
 }
 
 .file-input-wrapper label {
