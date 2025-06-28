@@ -10,86 +10,102 @@ class DiffViewerApp {
         this.file2Name = '';
         this.diffCalculator = new DiffCalculator();
         this.currentDiffHTML = '';
+
+        // DOM要素をプロパティとして保持
+        this.fileInput1 = document.getElementById('file1');
+        this.fileInput2 = document.getElementById('file2');
+        this.fileInfo1 = document.getElementById('file1-info');
+        this.fileInfo2 = document.getElementById('file2-info');
+        this.dropArea1 = document.getElementById('drop-area-1');
+        this.dropArea2 = document.getElementById('drop-area-2');
+        this.compareBtn = document.getElementById('compare-btn');
+        this.diffContainer = document.getElementById('diff-container');
+        this.resultSection = document.getElementById('result-section');
         
         this.initializeEventListeners();
-        this.setupDragAndDrop();
     }
 
     /**
      * イベントリスナーを初期化
      */
     initializeEventListeners() {
-        const file1Input = document.getElementById('file1');
-        const file2Input = document.getElementById('file2');
-        const compareBtn = document.getElementById('compare-btn');
         const downloadBtn = document.getElementById('download-btn');
+        const clearBtn = document.getElementById('clear-diff-btn');
 
         // ファイル選択イベント
-        file1Input.addEventListener('change', (e) => this.handleFileSelect(e, 1));
-        file2Input.addEventListener('change', (e) => this.handleFileSelect(e, 2));
-        
+        this.fileInput1.addEventListener('change', (e) => this.handleFileSelect(e, 1));
+        this.fileInput2.addEventListener('change', (e) => this.handleFileSelect(e, 2));
+
         // 比較ボタンイベント
-        compareBtn.addEventListener('click', () => this.performDiff());
+        this.compareBtn.addEventListener('click', () => this.compareFiles());
         
         // ダウンロードボタンイベント
         downloadBtn.addEventListener('click', () => this.downloadHTML());
-    }
 
-    /**
-     * ドラッグ＆ドロップ機能のセットアップ
-     */
-    setupDragAndDrop() {
-        const containers = document.querySelectorAll('.textarea-container');
-
-        containers.forEach(container => {
-            const textarea = container.querySelector('textarea');
-
-            // デフォルトの動作を無効化
-            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-                container.addEventListener(eventName, preventDefaults, false);
-            });
-
-            function preventDefaults(e) {
-                e.preventDefault();
-                e.stopPropagation();
-            }
-
-            // ドラッグオーバー時のハイライト
-            ['dragenter', 'dragover'].forEach(eventName => {
-                container.addEventListener(eventName, () => {
-                    container.classList.add('drag-over');
-                }, false);
-            });
-
-            // ドラッグリーブ時、ドロップ時のハイライト解除
-            ['dragleave', 'drop'].forEach(eventName => {
-                container.addEventListener(eventName, () => {
-                    container.classList.remove('drag-over');
-                }, false);
-            });
-
-            // ドロップ処理
-            container.addEventListener('drop', (e) => {
-                const dt = e.dataTransfer;
-                const files = dt.files;
-
-                if (files.length > 0) {
-                    const file = files[0];
-                    const reader = new FileReader();
-                    reader.onload = (event) => {
-                        textarea.value = event.target.result;
-                    };
-                    reader.onerror = () => {
-                        alert('ファイルの読み込みに失敗しました。');
-                    };
-                    reader.readAsText(file);
-                }
-            }, false);
+        // クリアボタンイベント
+        clearBtn.addEventListener('click', () => {
+            this.diffContainer.innerHTML = '';
+            this.resultSection.style.display = 'none';
+            this.fileInput1.value = ''; // Reset file input
+            this.fileInput2.value = ''; // Reset file input
+            this.clearFileData(1);
+            this.clearFileData(2);
         });
+
+        // Drag and drop イベント
+        this.setupDragAndDrop(this.dropArea1, 1);
+        this.setupDragAndDrop(this.dropArea2, 2);
+    }
+
+    setupDragAndDrop(dropArea, fileNumber) {
+        // デフォルトの動作を無効化
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, this.preventDefaults, false);
+            document.body.addEventListener(eventName, this.preventDefaults, false);
+        });
+
+        // ドラッグオーバー時のハイライト
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropArea.addEventListener(eventName, () => this.highlight(dropArea), false);
+        });
+
+        // ドラッグリーブ時、ドロップ時のハイライト解除
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, () => this.unhighlight(dropArea), false);
+        });
+
+        // ドロップ処理
+        dropArea.addEventListener('drop', (e) => this.handleDrop(e, fileNumber), false);
+    }
+
+    preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    highlight(element) {
+        element.classList.add('drag-over');
+    }
+
+    unhighlight(element) {
+        element.classList.remove('drag-over');
+    }
+
+    handleDrop(e, fileNumber) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+
+        if (files.length > 0) {
+            // ドロップされたファイルを input に設定して change イベントを発火させる
+            const inputElement = fileNumber === 1 ? this.fileInput1 : this.fileInput2;
+            inputElement.files = files;
+            const changeEvent = new Event('change', { bubbles: true });
+            inputElement.dispatchEvent(changeEvent);
+        }
     }
 
     /**
-     * ファイル選択処理
+     * ファイル選択時の処理
      * @param {Event} event - ファイル選択イベント
      * @param {number} fileNumber - ファイル番号（1または2）
      */
@@ -150,12 +166,12 @@ class DiffViewerApp {
      * @param {number} fileNumber - ファイル番号
      */
     displayFileInfo(file, fileNumber) {
-        const infoElement = document.getElementById(`file${fileNumber}-info`);
+        const infoElement = fileNumber === 1 ? this.fileInfo1 : this.fileInfo2;
         const fileSize = this.formatFileSize(file.size);
         const lastModified = new Date(file.lastModified).toLocaleString('ja-JP');
         
         infoElement.innerHTML = `
-            <strong>${file.name}</strong><br>
+            <strong>${this.escapeHtml(file.name)}</strong><br>
             サイズ: ${fileSize}<br>
             更新日時: ${lastModified}
         `;
@@ -183,13 +199,14 @@ class DiffViewerApp {
         if (fileNumber === 1) {
             this.file1Content = null;
             this.file1Name = '';
+            this.fileInfo1.style.display = 'none';
+            this.fileInfo1.innerHTML = '';
         } else {
             this.file2Content = null;
             this.file2Name = '';
+            this.fileInfo2.style.display = 'none';
+            this.fileInfo2.innerHTML = '';
         }
-        
-        const infoElement = document.getElementById(`file${fileNumber}-info`);
-        infoElement.style.display = 'none';
         
         this.updateCompareButtonState();
     }
@@ -198,22 +215,16 @@ class DiffViewerApp {
      * 比較ボタンの状態を更新
      */
     updateCompareButtonState() {
-        const compareBtn = document.getElementById('compare-btn');
-        const canCompare = this.file1Content !== null && this.file2Content !== null;
-        
-        compareBtn.disabled = !canCompare;
+        this.compareBtn.disabled = !(this.file1Content !== null && this.file2Content !== null);
     }
 
     /**
      * 差分比較を実行
      */
-    async performDiff() {
-        const diffContainer = document.getElementById('diff-container');
-        const resultSection = document.getElementById('result-section');
-        
+    async compareFiles() {
         // ローディング表示
-        diffContainer.innerHTML = '<div class="loading">差分を計算中...</div>';
-        resultSection.style.display = 'block';
+        this.diffContainer.innerHTML = '<div class="loading">差分を計算中...</div>';
+        this.resultSection.style.display = 'block';
         
         try {
             // 少し遅延を入れてローディングを表示
@@ -245,8 +256,14 @@ class DiffViewerApp {
      * @param {Array} diffResult - 差分結果
      */
     displayDiffResult(diffResult) {
-        const diffContainer = document.getElementById('diff-container');
-        
+        const hasChanges = diffResult.some(diff => ['added', 'removed', 'modified'].includes(diff.type));
+
+        if (!hasChanges) {
+            alert('差分はありません');
+            this.diffContainer.innerHTML = '<div class="no-diff-message">差分はありません</div>';
+            return;
+        }
+
         let html = `
         <table class="diff-table">
             <thead>
@@ -296,50 +313,27 @@ class DiffViewerApp {
         </table>
         `;
         
-        diffContainer.innerHTML = html;
+        this.diffContainer.innerHTML = html;
     }
 
     /**
-     * HTMLをダウンロード
+     * 差分結果をHTMLファイルとしてダウンロード
      */
     downloadHTML() {
         if (!this.currentDiffHTML) {
-            this.showError('ダウンロードするデータがありません。まず差分を表示してください。');
+            alert('比較結果がありません。');
             return;
         }
-        
-        const blob = new Blob([this.currentDiffHTML], { type: 'text/html; charset=utf-8' });
+
+        const blob = new Blob([this.currentDiffHTML], { type: 'text/html' });
         const url = URL.createObjectURL(blob);
-        
         const a = document.createElement('a');
         a.href = url;
-        a.download = `diff_${this.file1Name}_vs_${this.file2Name}_${this.getTimestamp()}.html`;
+        a.download = 'diff_result.html';
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
-        
         URL.revokeObjectURL(url);
-    }
-
-    /**
-     * タイムスタンプを取得
-     * @returns {string} タイムスタンプ文字列
-     */
-    getTimestamp() {
-        const now = new Date();
-        return now.toISOString().replace(/[:.]/g, '-').slice(0, 19);
-    }
-
-    /**
-     * HTMLエスケープ
-     * @param {string} text - エスケープするテキスト
-     * @returns {string} エスケープ済みテキスト
-     */
-    escapeHtml(text) {
-        if (!text) return '';
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
     }
 
     /**
@@ -347,13 +341,31 @@ class DiffViewerApp {
      * @param {string} message - エラーメッセージ
      */
     showError(message) {
-        alert(message);
         console.error(message);
+        alert(message);
+        this.diffContainer.innerHTML = `<div class="error-message">${this.escapeHtml(message)}</div>`;
+    }
+
+    /**
+     * HTML特殊文字をエスケープ
+     * @param {string} str - 対象文字列
+     * @returns {string} エスケープ後の文字列
+     */
+    escapeHtml(str) {
+        if (typeof str !== 'string') return '';
+        return str.replace(/[&<>"']/g, function(match) {
+            return {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            }[match];
+        });
     }
 }
 
-// アプリケーション初期化
+// アプリケーションのインスタンスを作成
 document.addEventListener('DOMContentLoaded', () => {
-    window.diffViewerApp = new DiffViewerApp();
+    new DiffViewerApp();
 });
-

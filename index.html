@@ -15,20 +15,25 @@
 
         <div class="upload-section">
             <div class="file-input-group">
-                <div class="file-input-wrapper">
-                    <label for="file1">左側ファイル:</label>
-                    <input type="file" id="file1" accept=".txt,.js,.html,.css,.py,.java,.cpp,.c,.h,.md" />
-                    <div class="file-info" id="file1-info"></div>
+                <div class="textarea-container" id="drop-area-1">
+                    <div class="file-input-wrapper">
+                        <label for="file1">左側ファイル:</label>
+                        <input type="file" id="file1" class="file-input" accept=".txt,.js,.html,.css,.py,.java,.c,.cpp,.h,.cs,.php,.rb,.go,.rs,.swift,.kt,.ts,.json,.xml,.yaml,.md">
+                        <div class="file-info" id="file1-info"></div>
+                    </div>
                 </div>
-                <div class="file-input-wrapper">
-                    <label for="file2">右側ファイル:</label>
-                    <input type="file" id="file2" accept=".txt,.js,.html,.css,.py,.java,.cpp,.c,.h,.md" />
-                    <div class="file-info" id="file2-info"></div>
+                <div class="textarea-container" id="drop-area-2">
+                    <div class="file-input-wrapper">
+                        <label for="file2">右側ファイル:</label>
+                        <input type="file" id="file2" class="file-input" accept=".txt,.js,.html,.css,.py,.java,.c,.cpp,.h,.cs,.php,.rb,.go,.rs,.swift,.kt,.ts,.json,.xml,.yaml,.md">
+                        <div class="file-info" id="file2-info"></div>
+                    </div>
                 </div>
-            </div>
-            <button id="compare-btn" class="compare-button" disabled>差分を表示する</button>
         </div>
-
+        <div class="controls">
+            <button id="compare-btn" class="compare-button" disabled>差分を表示する</button>
+            <button id="clear-diff-btn" class="compare-button clear-button">クリア</button>
+        </div>
         <div class="result-section" id="result-section" style="display: none;">
             <div class="result-header">
                 <h2>差分表示結果</h2>
