@@ -11,28 +11,40 @@
         <header>
             <h1>テキストファイル差分表示ツール</h1>
             <p>2つのテキストファイルをアップロードして差分を表示します</p>
+            <div class="language-selector">
+                <input type="radio" id="lang-ja" name="language" value="ja" checked>
+                <label for="lang-ja">日本語</label>
+                <input type="radio" id="lang-en" name="language" value="en">
+                <label for="lang-en">English</label>
+            </div>
         </header>
 
         <div class="upload-section">
             <div class="file-input-group">
                 <div class="textarea-container" id="drop-area-1">
                     <div class="file-input-wrapper">
-                        <label for="file1">左側ファイル:</label>
+                        <label for="file1">左側のファイルを選択</label>
+                        <label class="file-input-label" for="file1">
+                            ファイルを選択
+                        </label>
                         <input type="file" id="file1" class="file-input" accept=".txt,.js,.html,.css,.py,.java,.c,.cpp,.h,.cs,.php,.rb,.go,.rs,.swift,.kt,.ts,.json,.xml,.yaml,.md">
                         <div class="file-info" id="file1-info"></div>
                     </div>
                 </div>
                 <div class="textarea-container" id="drop-area-2">
                     <div class="file-input-wrapper">
-                        <label for="file2">右側ファイル:</label>
+                        <label for="file2">右側のファイルを選択</label>
+                        <label class="file-input-label" for="file2">
+                            ファイルを選択
+                        </label>
                         <input type="file" id="file2" class="file-input" accept=".txt,.js,.html,.css,.py,.java,.c,.cpp,.h,.cs,.php,.rb,.go,.rs,.swift,.kt,.ts,.json,.xml,.yaml,.md">
                         <div class="file-info" id="file2-info"></div>
                     </div>
                 </div>
         </div>
         <div class="controls">
-            <button id="compare-btn" class="compare-button" disabled>差分を表示する</button>
-            <button id="clear-diff-btn" class="compare-button clear-button">クリア</button>
+            <button id="compare-btn" class="button button-primary" disabled>差分を表示する</button>
+            <button id="clear-diff-btn" class="button button-secondary">クリア</button>
         </div>
         <div class="result-section" id="result-section" style="display: none;">
             <div class="result-header">
