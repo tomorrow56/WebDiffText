@@ -10,6 +10,7 @@ class DiffViewerApp {
         this.file2Name = '';
         this.diffCalculator = new DiffCalculator();
         this.currentDiffHTML = '';
+        this.currentLang = 'ja';
 
         // DOM要素をプロパティとして保持
         this.fileInput1 = document.getElementById('file1');
@@ -23,7 +24,50 @@ class DiffViewerApp {
         this.resultSection = document.getElementById('result-section');
         
         this.initializeEventListeners();
+        this.updateUI();
     }
+
+    /**
+     * UIテキスト
+     */
+    uiText = {
+        ja: {
+            title: "テキストファイル差分表示ツール",
+            description: "2つのテキストファイルをアップロードして差分を表示します",
+            leftFile: "左側のファイルを選択",
+            rightFile: "右側のファイルを選択",
+            selectFile: "ファイルを選択",
+            compare: "差分を表示する",
+            clear: "クリア",
+            resultTitle: "差分表示結果",
+            download: "HTMLをダウンロード",
+            noDiff: "差分はありません",
+            loading: "差分を計算中...",
+            fileReadError: "ファイル読み込みエラー",
+            diffError: "差分計算エラー",
+            noResult: "比較結果がありません。",
+            fileSize: "サイズ",
+            lastModified: "更新日時",
+        },
+        en: {
+            title: "Text File Diff Viewer",
+            description: "Upload two text files to display the differences.",
+            leftFile: "Select Left File",
+            rightFile: "Select Right File",
+            selectFile: "Select File",
+            compare: "Show Differences",
+            clear: "Clear",
+            resultTitle: "Difference Result",
+            download: "Download HTML",
+            noDiff: "No differences.",
+            loading: "Calculating differences...",
+            fileReadError: "File read error",
+            diffError: "Difference calculation error",
+            noResult: "No comparison result.",
+            fileSize: "Size",
+            lastModified: "Last Modified",
+        }
+    };
 
     /**
      * イベントリスナーを初期化
@@ -55,6 +99,31 @@ class DiffViewerApp {
         // Drag and drop イベント
         this.setupDragAndDrop(this.dropArea1, 1);
         this.setupDragAndDrop(this.dropArea2, 2);
+
+        // 言語選択イベント
+        document.querySelectorAll('input[name="language"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                this.currentLang = e.target.value;
+                this.updateUI();
+            });
+        });
+    }
+
+    /**
+     * UIを更新
+     */
+    updateUI() {
+        const t = this.uiText[this.currentLang];
+        document.querySelector('header h1').textContent = t.title;
+        document.querySelector('header p').textContent = t.description;
+        this.dropArea1.querySelector('label[for="file1"]').textContent = t.leftFile;
+        this.dropArea1.querySelector('.file-input-label').textContent = t.selectFile;
+        this.dropArea2.querySelector('label[for="file2"]').textContent = t.rightFile;
+        this.dropArea2.querySelector('.file-input-label').textContent = t.selectFile;
+        this.compareBtn.textContent = t.compare;
+        document.getElementById('clear-diff-btn').textContent = t.clear;
+        document.querySelector('.result-header h2').textContent = t.resultTitle;
+        document.getElementById('download-btn').textContent = t.download;
     }
 
     setupDragAndDrop(dropArea, fileNumber) {
@@ -134,7 +203,7 @@ class DiffViewerApp {
             this.updateCompareButtonState();
             
         } catch (error) {
-            this.showError(`ファイル読み込みエラー: ${error.message}`);
+            this.showError(`${this.uiText[this.currentLang].fileReadError}: ${error.message}`);
             this.clearFileData(fileNumber);
         }
     }
@@ -168,12 +237,12 @@ class DiffViewerApp {
     displayFileInfo(file, fileNumber) {
         const infoElement = fileNumber === 1 ? this.fileInfo1 : this.fileInfo2;
         const fileSize = this.formatFileSize(file.size);
-        const lastModified = new Date(file.lastModified).toLocaleString('ja-JP');
+        const lastModified = new Date(file.lastModified).toLocaleString(this.currentLang);
         
         infoElement.innerHTML = `
             <strong>${this.escapeHtml(file.name)}</strong><br>
-            サイズ: ${fileSize}<br>
-            更新日時: ${lastModified}
+            ${this.uiText[this.currentLang].fileSize}: ${fileSize}<br>
+            ${this.uiText[this.currentLang].lastModified}: ${lastModified}
         `;
         infoElement.style.display = 'block';
     }
@@ -223,7 +292,7 @@ class DiffViewerApp {
      */
     async compareFiles() {
         // ローディング表示
-        this.diffContainer.innerHTML = '<div class="loading">差分を計算中...</div>';
+        this.diffContainer.innerHTML = `<div class="loading message-box">${this.uiText[this.currentLang].loading}</div>`;
         this.resultSection.style.display = 'block';
         
         try {
@@ -247,7 +316,7 @@ class DiffViewerApp {
             );
             
         } catch (error) {
-            this.showError(`差分計算エラー: ${error.message}`);
+            this.showError(`${this.uiText[this.currentLang].diffError}: ${error.message}`);
         }
     }
 
@@ -259,8 +328,8 @@ class DiffViewerApp {
         const hasChanges = diffResult.some(diff => ['added', 'removed', 'modified'].includes(diff.type));
 
         if (!hasChanges) {
-            alert('差分はありません');
-            this.diffContainer.innerHTML = '<div class="no-diff-message">差分はありません</div>';
+            alert(this.uiText[this.currentLang].noDiff);
+            this.diffContainer.innerHTML = `<div class="no-diff-message message-box">${this.uiText[this.currentLang].noDiff}</div>`;
             return;
         }
 
@@ -321,7 +390,7 @@ class DiffViewerApp {
      */
     downloadHTML() {
         if (!this.currentDiffHTML) {
-            alert('比較結果がありません。');
+            alert(this.uiText[this.currentLang].noResult);
             return;
         }
 
@@ -343,7 +412,7 @@ class DiffViewerApp {
     showError(message) {
         console.error(message);
         alert(message);
-        this.diffContainer.innerHTML = `<div class="error-message">${this.escapeHtml(message)}</div>`;
+        this.diffContainer.innerHTML = `<div class="error-message message-box">${this.escapeHtml(message)}</div>`;
     }
 
     /**

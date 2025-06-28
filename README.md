@@ -1,70 +1,56 @@
-# テキストファイル差分表示ツール
+# Text File Diff Viewer
 
-2つのテキストファイルを左右に並べて差分を表示するWebアプリケーションです。
+A web application that displays the differences between two text files side by side.
 
-## 機能
+## Features
 
-- **ファイルアップロード**: 2つのテキストファイルを別々にアップロード可能
-- **差分表示**: 左右2ペインで行ベースの差分を表示
-- **色分け表示**: 
-  - 🟢 緑色: 追加された行
-  - 🔴 赤色: 削除された行
-  - 🟡 黄色: 修正された行
-  - ⚪ 白色: 変更なしの行
-- **HTMLダウンロード**: 差分表示結果をHTML形式でダウンロード可能
-- **レスポンシブデザイン**: デスクトップとモバイルの両方に対応
+- **File Upload**: Upload two text files by drag & drop or file selection.
+- **Diff Display**: Displays line-based differences in two panes.
+- **Multi-language Support**: Switch between Japanese and English display.
+- **Color-coded Display**:
+  - 🟢 Green: Added lines
+  - 🔴 Red: Deleted lines
+  - 🟡 Yellow: Modified lines
+  - ⚪ White: Unchanged lines
+- **HTML Download**: Download the diff result as an HTML file.
+- **Responsive Design**: Supports both desktop and mobile.
 
-## ファイル構成
+## File Structure
 
 ```
-diff_viewer_app/
-├── index.html          # メインのHTMLファイル
-├── styles.css          # スタイルシート
-├── script.js           # メインのJavaScriptファイル
-├── diff-algorithm.js   # 差分計算アルゴリズム
-└── README.md          # このファイル
+diff_viewer/
+├── index.html          # Main HTML file
+├── styles.css          # Stylesheet
+├── script.js           # Main JavaScript file
+├── diff-algorithm.js   # Diff calculation algorithm
+├── README.md           # This file (English)
+└── README_j.md         # README file (Japanese)
 ```
 
-## 使用方法
+## How to Use
 
-1. **ローカルサーバーの起動**
-   ```bash
-   cd diff_viewer_app
-   python3 -m http.server 8080
-   ```
+1. Open `index.html` in your browser.
 
-2. **ブラウザでアクセス**
-   ```
-   http://localhost:8080
-   ```
+2. **Select Language**
+   - Select Japanese or English using the language selection buttons in the header.
 
-3. **ファイルのアップロード**
-   - 「左側ファイル」と「右側ファイル」をそれぞれ選択
-   - 対応ファイル形式: .txt, .js, .html, .css, .py, .java, .cpp, .c, .h, .md
+3. **Upload Files**
+   - Drag and drop files into the "Select Left File" and "Select Right File" areas, or click the "Select File" button to select files.
+   - Supported file formats: .txt, .js, .html, .css, .py, .java, .c, .cpp, .h, .cs, .php, .rb, .go, .rs, .swift, .kt, .ts, .json, .xml, .yaml, .md
 
-4. **差分表示**
-   - 「差分を表示する」ボタンをクリック
-   - 左右2ペインで差分が表示されます
+4. **Show Differences**
+   - Click the "Show Differences" button to display the differences in two panes.
 
-5. **HTMLダウンロード**
-   - 「HTMLをダウンロード」ボタンをクリック
-   - 差分表示結果がHTML形式でダウンロードされます
+5. **Download HTML**
+   - Click the "Download HTML" button to download the diff result as an HTML file.
 
-## 技術仕様
+## Technical Specifications
 
-- **フロントエンド**: HTML5, CSS3, JavaScript (ES6+)
-- **差分アルゴリズム**: LCS (Longest Common Subsequence) ベースの行比較
-- **ブラウザ対応**: モダンブラウザ (Chrome, Firefox, Safari, Edge)
-- **ファイルサイズ制限**: ブラウザのメモリ制限に依存
+- **Frontend**: HTML5, CSS3, JavaScript (ES6+)
+- **Diff Algorithm**: Line comparison based on LCS (Longest Common Subsequence)
+- **Browser Support**: Modern browsers (Chrome, Firefox, Safari, Edge)
 
-## 特徴
+## Characteristics
 
-- **クライアントサイド処理**: すべての処理がブラウザ内で完結
-- **プライバシー保護**: ファイルがサーバーに送信されることはありません
-- **高速処理**: 効率的な差分計算アルゴリズムを使用
-- **美しいUI**: モダンなデザインとスムーズなアニメーション
-
-## ライセンス
-
-このプロジェクトはMITライセンスの下で公開されています。
-
+- **Client-side Processing**: All processing is completed in the browser, so files are not sent to the server and privacy is protected.
+- **Modern UI**: Provides a clean and intuitive user interface.
